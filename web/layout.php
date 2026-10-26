@@ -12,7 +12,7 @@ function head(string $title, string $active) { ?>
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= h($title) ?> | Peta Kejahatan Chicago</title>
 <link rel="stylesheet" href="assets/leaflet.css"><link rel="stylesheet" href="assets/app.css">
-<script src="assets/chart.js"></script><script src="assets/leaflet.js"></script><script src="assets/peta.js"></script></head><body>
+<script src="assets/chart.js"></script><script src="assets/leaflet.js"></script><script src="assets/leaflet-heat.js"></script><script src="assets/peta.js"></script></head><body>
 <header class="bar"><div class="wrap"><a href="index.php" class="logo">PETA KEJAHATAN CHICAGO</a>
 <nav aria-label="Utama"><?php foreach (['index.php' => 'Beranda', 'modul1.php' => 'Modul 1: Import', 'modul2.php' => 'Modul 2: Analisis', 'kode.php' => 'Kode'] as $u => $t): ?>
 <a href="<?= $u ?>" <?= $active === $u ? 'aria-current="page"' : '' ?>><?= $t ?></a><?php endforeach ?></nav></div></header>

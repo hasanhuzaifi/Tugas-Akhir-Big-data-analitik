@@ -18,4 +18,13 @@ if ($a === 'cmp' && $js) {
         'korelasi' => q("SELECT a,b,corr FROM a_type_corr WHERE a IN ($in) AND b IN ($in)", array_merge($js, $js)),
     ]);
 }
+if ($a === 'district') {   // detail satu district untuk penjelajah ML
+    $d = (int)($_GET['d'] ?? 0);
+    json_out([
+        'next'  => one('SELECT * FROM next_day WHERE district=?', [$d]),
+        'seri'  => q('SELECT day,n,prediction p FROM test_pred WHERE district=? ORDER BY day', [$d]),
+        'jam'   => q('SELECT dow,hr,n FROM mr_dhh WHERE district=?', [$d]),
+        'total' => one('SELECT n,arrest_rate FROM district WHERE district=?', [$d]),
+    ]);
+}
 json_out(['error' => 'a=grid|cmp']);

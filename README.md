@@ -134,7 +134,7 @@ https://data.cityofchicago.org/resource/ijzp-q8t2.csv?$where=date between '2026-
 |---|---|
 | Beranda | Ringkasan data, KPI, status |
 | **Modul 1: Import** | Tempel link Socrata, kirim ke NiFi, lihat ukuran di HDFS, jalankan pipeline dengan stepper 8 tahap |
-| **Modul 2: Analisis** | **Di mana**: peta panas per jenis, mode Selisih antar jenis. **Apa dan kapan**: jenis x bulan/jam/district, korelasi antar jenis. **Besok**: prakiraan risiko per district dan kartu peringatan |
+| **Modul 2: Analisis** | Tiap tahap diawali **Kesimpulan** dan cara membaca. **Di mana**: peta panas halus yang bisa di-zoom, layar penuh, slider radius dan ambang, daftar titik terpanas, mode Selisih. **Apa dan kapan**: jenis x bulan/jam/district, pilihan cepat, korelasi. **Besok**: kartu risiko yang bisa disaring dan diklik (detail district, meter risiko, prakiraan vs kenyataan) serta permainan Tebak dulu |
 | **Kode** | Seluruh skrip PySpark, MapReduce, dan shell beserta lokasinya dan penjelasan sintaks |
 
 ## Hasil utama
