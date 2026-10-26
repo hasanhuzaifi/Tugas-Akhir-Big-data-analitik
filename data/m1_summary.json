@@ -1,11 +1,11 @@
 {
   "crime": {
-    "rows_in": 770147,
-    "dup_identical": 39595,
-    "dup_key": 22,
-    "rows_after_dedup": 730530,
+    "rows_in": 770151,
+    "dup_identical": 39585,
+    "dup_key": 30,
+    "rows_after_dedup": 730536,
     "dropped_partial_day": "2026-10-16",
-    "rows_final": 730513
+    "rows_final": 730519
   },
   "crashes": {
     "rows_in": 332474,

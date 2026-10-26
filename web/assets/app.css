@@ -105,3 +105,9 @@ body.fs-lock{overflow:hidden}
 tr.klik{cursor:pointer}tr.klik:hover{background:var(--kabut)}tr.sel{background:#fff4d6}
 
 .dasar{filter:grayscale(.85) contrast(.9) brightness(1.05)}
+
+#toast{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:60;max-width:min(360px,calc(100vw - 32px))}
+.tst{background:var(--aspal);color:#fff;border-left:5px solid var(--danau);padding:10px 14px;border-radius:2px;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:14px;animation:tin .2s ease-out}
+.tst.ok{border-color:#2e7d46}.tst.gagal{border-color:var(--bendera)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.tst{animation:none}}

@@ -23,7 +23,7 @@ Penulis: Hasan Huzaifi
 
 ## Tentang proyek
 Warga dan petugas perlu tahu **di mana**, **kapan**, dan **jenis** kejahatan yang berisiko. Proyek ini:
-- mengambil data dari API Socrata (portal data Chicago) lewat link yang ditempel di web,
+- mengambil data dari API Socrata (portal data Chicago) lewat link yang disusun web dari pilihan dataset dan periode,
 - membersihkan dan menyimpannya di HDFS,
 - menganalisis dengan Spark dan MapReduce,
 - memprediksi jumlah kejahatan harian dengan MLlib,
@@ -42,7 +42,7 @@ Tiga dataset dari `data.cityofchicago.org`, rentang 3 tahun (2023-10-25 sampai 2
 
 ## Arsitektur
 ```
-Web Modul 1 (tempel link Socrata)
+Web Modul 1 (pilih dataset + periode -> link Socrata disusun otomatis)
   -> PHP validasi (host data.cityofchicago.org + 3 resource)
   -> NiFi ListenHTTP :8081 /ingest   (baris "dataset|nama|url")
   -> SplitText -> ExtractText -> InvokeHTTP -> UpdateAttribute
@@ -119,7 +119,7 @@ Langkah:
    ```
    Sesuaikan `web/laravel-jobs/config/jobs.php`: `run_dir` (folder tanpa spasi dan `&`, mis. `C:/Temp/bigdata-web`), `repo_unc` (UNC repo di WSL), `vault_doc` (jalur ke `docs/peta-kode-spark.md`), dan nama distro pada perintah WSL jika bukan `Ubuntu`.
 8. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
-9. **Jalankan**: buka web, Modul 1, tempel link Socrata (atau tombol "Isi contoh"), kirim. Atau jalankan tahap manual di WSL:
+9. **Jalankan**: buka web, Modul 1, pilih dataset dan bulan, klik Kirim ke NiFi (notifikasi muncul di tiap tahap). Atau jalankan tahap manual di WSL:
    ```bash
    bash src/pipeline.sh crime        # crime | crashes | 311 | all
    ```
@@ -133,7 +133,7 @@ https://data.cityofchicago.org/resource/ijzp-q8t2.csv?$where=date between '2026-
 | Halaman | Fungsi |
 |---|---|
 | Beranda | Temuan utama, KPI, peta mini, alur pipeline |
-| **Modul 1: Import** | Tempel link Socrata, kirim ke NiFi, lihat ukuran di HDFS, jalankan pipeline dengan stepper 8 tahap |
+| **Modul 1: Import** | Pilih dataset dan periode (tanpa mengetik link), kirim ke NiFi dengan notifikasi tiap tahap, lihat ukuran di HDFS, jalankan pipeline dengan stepper 8 tahap |
 | **Modul 2: Analisis** | Tiap tahap diawali kotak **Kesimpulan** dan cara membaca. **Di mana**: peta panas halus yang bisa di-zoom dan layar penuh, slider radius dan ambang, daftar titik terpanas, mode Selisih antar jenis. **Apa dan kapan**: jenis x bulan/jam/district, pilihan cepat, korelasi. **Besok**: kartu risiko yang bisa disaring dan diklik (meter risiko, prakiraan vs kenyataan, jam rawan) serta permainan **Tebak dulu** |
 | **Kode** | Seluruh skrip PySpark, MapReduce, dan shell beserta lokasinya dan penjelasan sintaks |
 
