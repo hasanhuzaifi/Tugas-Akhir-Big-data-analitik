@@ -1,6 +1,6 @@
 # DESIGN.md: Peta Kejahatan Chicago (Tugas Akhir Big Data)
 
-Dokumen ini ditulis sebelum kode. Pedoman: skill `frontend-design`. Pemilik keputusan visual: halaman web di folder ini. Spesifikasi fungsi ada di vault: `references/PRD-web.md`.
+Dokumen ini ditulis sebelum kode. Pemilik keputusan visual: halaman web di folder ini.
 
 ## 1. Subjek, pengguna, tugas utama
 - **Subjek:** kejahatan terlapor di Chicago, 25 Okt 2023 sampai 15 Okt 2026 (730.504 kejadian), diperkaya data 311 dan kecelakaan.

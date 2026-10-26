@@ -4,7 +4,7 @@ return [
     'run_dir' => 'C:/Temp/bigdata-web', // tanpa spasi dan '&' (cmd.exe); = /mnt/c/Temp/bigdata-web di WSL
     'repo' => '~/tugas-akhir-bigdata',
     'repo_unc' => '//wsl.localhost/Ubuntu/home/lenovo/tugas-akhir-bigdata',
-    'vault_doc' => 'D:/Kuliah/Big Data & Analitik/Vault Tugas Akhir/01-Projects/Tugas-Akhir/references/peta-kode-spark.md',
+    'vault_doc' => '//wsl.localhost/Ubuntu/home/lenovo/tugas-akhir-bigdata/docs/peta-kode-spark.md',
     'jobs' => [
         'hdfs'      => 'hdfs dfs -du -s -h /data/raw/crime /data/raw/crashes /data/raw/311',
         'prep'      => 'bash src/mr/run_prep.sh DS',
