@@ -1,0 +1,13 @@
+data/*
+!data/bi/
+!data/ml/
+!data/*.json
+__pycache__/
+*.pyc
+.venv/
+spark-warehouse/
+metastore_db/
+derby.log
+
+.env
+web_export/
