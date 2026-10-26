@@ -27,7 +27,7 @@ Warga dan petugas perlu tahu **di mana**, **kapan**, dan **jenis** kejahatan yan
 - membersihkan dan menyimpannya di HDFS,
 - menganalisis dengan Spark dan MapReduce,
 - memprediksi jumlah kejahatan harian dengan MLlib,
-- menampilkan hasilnya di web interaktif (peta panas, perbandingan jenis, prakiraan besok).
+- menampilkan hasilnya di web interaktif (peta panas interaktif, perbandingan jenis, prakiraan besok dengan penjelajah per district).
 
 Hasilnya prakiraan statistik, bukan kepastian, dan bukan pengganti informasi resmi kepolisian.
 
@@ -132,9 +132,9 @@ https://data.cityofchicago.org/resource/ijzp-q8t2.csv?$where=date between '2026-
 ## Memakai aplikasi
 | Halaman | Fungsi |
 |---|---|
-| Beranda | Ringkasan data, KPI, status |
+| Beranda | Temuan utama, KPI, peta mini, alur pipeline |
 | **Modul 1: Import** | Tempel link Socrata, kirim ke NiFi, lihat ukuran di HDFS, jalankan pipeline dengan stepper 8 tahap |
-| **Modul 2: Analisis** | Tiap tahap diawali **Kesimpulan** dan cara membaca. **Di mana**: peta panas halus yang bisa di-zoom, layar penuh, slider radius dan ambang, daftar titik terpanas, mode Selisih. **Apa dan kapan**: jenis x bulan/jam/district, pilihan cepat, korelasi. **Besok**: kartu risiko yang bisa disaring dan diklik (detail district, meter risiko, prakiraan vs kenyataan) serta permainan Tebak dulu |
+| **Modul 2: Analisis** | Tiap tahap diawali kotak **Kesimpulan** dan cara membaca. **Di mana**: peta panas halus yang bisa di-zoom dan layar penuh, slider radius dan ambang, daftar titik terpanas, mode Selisih antar jenis. **Apa dan kapan**: jenis x bulan/jam/district, pilihan cepat, korelasi. **Besok**: kartu risiko yang bisa disaring dan diklik (meter risiko, prakiraan vs kenyataan, jam rawan) serta permainan **Tebak dulu** |
 | **Kode** | Seluruh skrip PySpark, MapReduce, dan shell beserta lokasinya dan penjelasan sintaks |
 
 ## Hasil utama
