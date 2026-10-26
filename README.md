@@ -119,7 +119,7 @@ Langkah:
    ```
    Sesuaikan `web/laravel-jobs/config/jobs.php`: `run_dir` (folder tanpa spasi dan `&`, mis. `C:/Temp/bigdata-web`), `repo_unc` (UNC repo di WSL), `vault_doc` (jalur ke `docs/peta-kode-spark.md`), dan nama distro pada perintah WSL jika bukan `Ubuntu`.
 8. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
-9. **Jalankan**: buka web, Modul 1, pilih dataset dan bulan, klik Kirim ke NiFi (notifikasi muncul di tiap tahap). Atau jalankan tahap manual di WSL:
+9. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan periode (Satu bulan atau Rentang kustom), klik Kirim ke NiFi (notifikasi muncul di tiap tahap). Atau jalankan tahap manual di WSL:
    ```bash
    bash src/pipeline.sh crime        # crime | crashes | 311 | all
    ```
@@ -133,7 +133,7 @@ https://data.cityofchicago.org/resource/ijzp-q8t2.csv?$where=date between '2026-
 | Halaman | Fungsi |
 |---|---|
 | Beranda | Temuan utama, KPI, peta mini, alur pipeline |
-| **Modul 1: Import** | Pilih dataset dan periode (tanpa mengetik link), kirim ke NiFi dengan notifikasi tiap tahap, lihat ukuran di HDFS, jalankan pipeline dengan stepper 8 tahap |
+| **Modul 1: Import** | Pilih dataset atau Semua dataset, lalu satu bulan atau rentang kustom (tanpa mengetik link), kirim ke NiFi dengan notifikasi tiap tahap, lihat ukuran di HDFS, jalankan pipeline dengan stepper 8 tahap |
 | **Modul 2: Analisis** | Tiap tahap diawali kotak **Kesimpulan** dan cara membaca. **Di mana**: peta panas halus yang bisa di-zoom dan layar penuh, slider radius dan ambang, daftar titik terpanas, mode Selisih antar jenis. **Apa dan kapan**: jenis x bulan/jam/district, pilihan cepat, korelasi. **Besok**: kartu risiko yang bisa disaring dan diklik (meter risiko, prakiraan vs kenyataan, jam rawan) serta permainan **Tebak dulu** |
 | **Kode** | Seluruh skrip PySpark, MapReduce, dan shell beserta lokasinya dan penjelasan sintaks |
 
