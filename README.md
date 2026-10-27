@@ -119,7 +119,7 @@ Langkah:
    ```
    Sesuaikan `web/laravel-jobs/config/jobs.php`: `run_dir` (folder tanpa spasi dan `&`, mis. `C:/Temp/bigdata-web`), `repo_unc` (UNC repo di WSL), `vault_doc` (jalur ke `docs/peta-kode-spark.md`), dan nama distro pada perintah WSL jika bukan `Ubuntu`.
 8. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
-9. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan periode (Satu bulan atau Rentang kustom), klik Kirim ke NiFi (notifikasi muncul di tiap tahap). Atau jalankan tahap manual di WSL:
+9. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan bulan (rentang kustom ada di Lanjutan), klik satu tombol **Jalankan preprocessing**: NiFi, HDFS, MapReduce prep di YARN, lalu Parquet berjalan otomatis (notifikasi di tiap tahap). Analisis dan ML dijalankan tombol terpisah di bagian 3. Atau jalankan tahap manual di WSL:
    ```bash
    bash src/pipeline.sh crime        # crime | crashes | 311 | all
    ```

@@ -224,7 +224,7 @@ $tinggi = count(array_filter($risk, fn($r) => $r['risk'] === 'Tinggi')); ?>
  <section class="panel"><h3>Fitur terpenting (GBT)</h3><div class="cv"><canvas id="cI"></canvas></div></section>
  <section class="panel" style="grid-column:1/-1"><h3>Aktual lawan prediksi, 12 bulan uji</h3><div class="cv"><canvas id="cP"></canvas></div></section>
  <section class="panel"><h3>Pengaruh hari lampau</h3><div class="cv"><canvas id="cL"></canvas></div></section>
- <section class="panel"><h3>Pengaruh 311 dan kecelakaan</h3><div class="cv"><canvas id="cE"></canvas></div><p class="small muted">Semua lemah (di bawah 0,35).</p></section>
+ <section class="panel"><h3>Data pendukung: 311 dan kecelakaan</h3><div class="cv"><canvas id="cE"></canvas></div><p class="small muted">Dua dataset ini diuji sebagai petunjuk tambahan (keluhan warga dan kecelakaan per district per hari). Hasilnya lemah (di bawah 0,35) dan tidak memperbaiki prakiraan, jadi dicatat sebagai temuan, bukan dipakai.</p></section>
  <section class="panel" style="grid-column:1/-1"><h3>MapReduce (YARN) dan PySpark</h3><div class="kv"><div><div class="big"><?= nf($mrT) ?></div><div class="small muted">Total MapReduce (37 map, 2 reduce)</div></div><div><div class="big"><?= nf($sparkT) ?></div><div class="small muted">Total PySpark</div></div><div><div class="big" style="color:var(--bendera)"><?= nf($mrT - $sparkT) ?></div><div class="small muted">Selisih = hari parsial yang dibuang Spark</div></div></div></section>
 </div>
 <h2 style="margin-top:32px">Jalankan ulang</h2>

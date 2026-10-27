@@ -5,6 +5,7 @@ set -e
 H=/usr/local/hadoop
 D=$(cd "$(dirname "$0")" && pwd)
 mkdir -p data
+$H/bin/hdfs dfsadmin -safemode wait >/dev/null 2>&1  # HDFS baru restart: tunggu safe mode keluar
 for ds in $( [ "${1:-all}" = all ] && echo crime crashes 311 || echo "$1" ); do
   echo "__STEP__prep:$ds"
   $H/bin/hdfs dfs -rm -r -f /data/clean/$ds >/dev/null 2>&1 || true
