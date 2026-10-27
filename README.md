@@ -96,7 +96,7 @@ Kebutuhan: Windows/Linux/macOS dengan **Laragon** (Apache + MySQL + PHP 8.2+) at
 ### Jalur B: pipeline penuh
 Kebutuhan:
 - Windows 11 + **WSL2 Ubuntu**, RAM minimal 16 GB (disarankan), disk kosong >= 15 GB
-- Java 17 (Hadoop/Spark) dan Java 21 (NiFi 2.12)
+- Java 17 (Hadoop/Spark) di WSL; JDK 21 atau lebih baru di Windows untuk NiFi 2.12
 - Hadoop 3.5 (HDFS + YARN, mode pseudo-distributed), Spark 4.0, NiFi 2.12
 - Python 3.10+ dengan `pyspark==4.0.0`, `pandas`, `pyarrow` (`pip install -r requirements.txt`)
 - MySQL (opsional, untuk tombol Impor ke MySQL)
@@ -105,9 +105,10 @@ Langkah:
 1. **Klon repo ke WSL**: `git clone https://github.com/hasanhuzaifi/Tugas-Akhir-Big-data-analitik.git ~/tugas-akhir-bigdata`
 2. **Lingkungan Python**: `cd ~/tugas-akhir-bigdata && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`
 3. **Hadoop**: `start-dfs.sh; start-yarn.sh; jps` (harus ada NameNode, DataNode, ResourceManager, NodeManager). Jangan jalankan `namenode -format` pada HDFS yang sudah berisi data. Buat direktori: `hdfs dfs -mkdir -p /data/raw/{crime,crashes,311}`.
-4. **NiFi**: pasang `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 (Maven Central) ke `$NIFI_HOME/lib` agar `PutHDFS` tersedia, lalu `nifi.sh start`. Buka `https://localhost:8443/nifi`.
-5. **Bangun flow**: `NIFI_USER=<user> NIFI_PASS=<sandi> python3 nifi/build_flow.py`, lalu jalankan semua processor di UI **kecuali** `GenerateFlowFile` (biarkan STOPPED; kalau hidup, ia mengunduh semua bulan sekaligus). `nifi/flow.json` adalah hasil ekspor flow.
-6. **Daemon harus hidup**: HDFS, YARN, dan NiFi mati bila sesi WSL berakhir. Jalankan di terminal WSL yang tetap terbuka, atau pakai `exec sleep infinity` di akhir perintah.
+4. **NiFi (di Windows, disarankan)**: unduh `nifi-2.12.0-bin.zip`, ekstrak ke folder `NiFi\` di samping proyek (junction `C:
+ifi` agar path tanpa spasi dan `&`), salin `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 ke `lib\`, atur login `java -cp "libootstrap\*;conf" org.apache.nifi.authentication.single.user.command.SetSingleUserCredentials <user> <sandi>` (sandi minimal 12 karakter), lalu `hidupkan_nifi.ps1`. NiFi di Windows tetap menulis ke HDFS di WSL (`localhost:9000`, mirrored networking). Alternatif NiFi di WSL: pasang `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 (Maven Central) ke `$NIFI_HOME/lib` agar `PutHDFS` tersedia, lalu `nifi.sh start`. Buka `https://localhost:8443/nifi`.
+5. **Bangun flow**: `NIFI_USER=<user> NIFI_PASS=<sandi> python3 nifi/build_flow.py` (NiFi Windows: tambah `NIFI_HOST=windows`), lalu jalankan semua processor di UI **kecuali** `GenerateFlowFile` (biarkan STOPPED; kalau hidup, ia mengunduh semua bulan sekaligus). `nifi/flow.json` adalah hasil ekspor flow.
+6. **Daemon harus hidup**: HDFS dan YARN (dan NiFi bila di WSL) mati bila sesi WSL berakhir; NiFi di Windows tidak ikut mati. Jalankan di terminal WSL yang tetap terbuka, atau pakai `exec sleep infinity` di akhir perintah.
 7. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
 8. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan bulan (rentang kustom ada di Lanjutan), klik **Ambil data pilihan** (akuisisi: NiFi ke HDFS; perkiraan ukuran tampil), lalu **Jalankan preprocessing** (MapReduce prep di YARN, lalu Parquet). Tombol **Unduh paket lebih dari 1 GB** menarik tiga dataset seluruh periode (±1,7 GB, syarat dosen). Analisis dan ML dijalankan tombol terpisah di bagian 3. Atau jalankan tahap manual di WSL:
    ```bash
@@ -153,7 +154,7 @@ PYTHONPATH=. .venv/bin/python -m tests.test_mr             # total MapReduce = S
 |---|---|---|
 | `Connection refused localhost:9000` | HDFS mati (sesi WSL berakhir) | `start-dfs.sh; start-yarn.sh` di terminal WSL yang tetap terbuka |
 | Tombol job tidak bereaksi | Streamlit belum jalan | `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` |
-| Kirim link: NiFi tidak terjangkau | NiFi mati atau ListenHTTP berhenti | `nifi.sh start`, jalankan processor |
+| Kirim link: NiFi tidak terjangkau | NiFi mati atau ListenHTTP berhenti | Windows: `hidupkan_nifi.ps1`; WSL: `nifi.sh start`; lalu jalankan processor |
 | NiFi mengunduh semua bulan | `GenerateFlowFile` hidup | Hentikan processor itu |
 | Halaman Modul 2 kosong | MySQL belum terisi | `php web/setup.php` |
 | Job gagal dengan jalur aneh | Spasi atau `&` di `run_dir` | Pakai jalur tanpa spasi, mis. `C:/Temp/bigdata-web` |

@@ -1,15 +1,20 @@
 """Bangun SATU flow NiFi Modul 1 lewat REST API untuk ketiga dataset (crime, crashes, 311):
 [GenerateFlowFile bulanan | ListenHTTP dari web] -> SplitText -> ExtractText -> InvokeHTTP -> UpdateAttribute -> PutFile (simpan lokal) -> PutHDFS.
 Pakai: NIFI_PASS=... python3 nifi/build_flow.py   (user: env NIFI_USER, default nifiadmin)
+NiFi di Windows: NIFI_HOST=windows NIFI_USER=root NIFI_PASS=... python nifi/build_flow.py
 """
 import json, os, ssl, urllib.request, urllib.parse, datetime as dt
 
 API = "https://localhost:8443/nifi-api"
 CTX = ssl._create_unverified_context()  # sertifikat self-signed lokal
-HADOOP = "/usr/local/hadoop/etc/hadoop/core-site.xml,/usr/local/hadoop/etc/hadoop/hdfs-site.xml"
+# NIFI_HOST=windows: NiFi di Windows (folder NiFi/), HDFS tetap di WSL (localhost:9000 via mirrored networking).
+WIN = os.environ.get("NIFI_HOST", "wsl").lower() == "windows"
+HADOOP = ("C:/nifi/conf-hadoop/core-site.xml,C:/nifi/conf-hadoop/hdfs-site.xml" if WIN
+          else "/usr/local/hadoop/etc/hadoop/core-site.xml,/usr/local/hadoop/etc/hadoop/hdfs-site.xml")
 START, END = dt.date(2023, 10, 25), dt.date(2026, 11, 1)
 BASE = "https://data.cityofchicago.org/resource/"
-LOCAL = "/home/lenovo/tugas-akhir-bigdata/data/landing"  # salinan lokal CSV hasil unduh, sebelum PutHDFS
+# salinan lokal CSV hasil unduh, sebelum PutHDFS
+LOCAL = "C:/nifi/landing" if WIN else "/home/lenovo/tugas-akhir-bigdata/data/landing"
 EXCL = ["311 INFORMATION ONLY CALL", "Aircraft Noise Complaint"]
 
 # (nama, resource, kolom tanggal, filter tambahan statis)
