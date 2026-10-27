@@ -1,5 +1,5 @@
-"""Logika bersama aplikasi Streamlit: data, validasi link, job, impor MySQL, rumus peta/ML.
-Logika aplikasi. Tanpa import streamlit supaya bisa diuji."""
+"""Logika bersama aplikasi Streamlit: data, validasi link, job, unduhan hasil, rumus peta/ML.
+Tanpa import streamlit supaya bisa diuji."""
 import hashlib, json, math, os, re, subprocess, time, urllib.parse, urllib.request
 from pathlib import Path
 
@@ -78,7 +78,7 @@ def siap():
 
 
 def muat():
-    """Semua tabel hasil pipeline sebagai dict DataFrame/dict (nama kolom = nama tabel MySQL)."""
+    """Semua tabel hasil pipeline sebagai dict DataFrame/dict (kunci = nama berkas CSV unduhan)."""
     j = lambda f: json.loads((WEB / f).read_text(encoding="utf-8"))
     m = j("metrics.json")
     d = {
@@ -393,70 +393,51 @@ def tahap_aktif(job, steps, done):
     return 5 if job == "preproses" and last == "selesai" else STEP_MAP.get(last, 3)
 
 
-# ---------- impor MySQL ----------
-def _koneksi(buat_db=True):
-    import pymysql
-    kw = dict(host="127.0.0.1", port=3306, user=os.environ.get("MYSQL_USER", "root"), password=os.environ.get("MYSQL_PASSWORD", ""), charset="utf8mb4", autocommit=False)
-    c = pymysql.connect(**kw)
-    if buat_db:
-        with c.cursor() as cur:
-            cur.execute("CREATE DATABASE IF NOT EXISTS chicago_bigdata CHARACTER SET utf8mb4")
-            cur.execute("USE chicago_bigdata")
-    return c
-
-
-def skema_tabel(d):
-    """[(tabel, ddl, kolom, baris)]."""
-    m, k, hd = d["metrics"], d["kpi"], d["hdfs"]
-    df = lambda x, cols: [tuple(r) for r in x[cols].itertuples(index=False, name=None)]
-    t = [
-        ("daily", "day DATE PRIMARY KEY, n INT", ["day", "n"], df(_csv("daily.csv").rename(columns={"tgl": "day", "count": "n"}), ["day", "n"])),
-        ("weekly", "minggu DATE PRIMARY KEY, n INT", ["minggu", "n"], df(_csv("weekly.csv").rename(columns={"count": "n"}), ["minggu", "n"])),
-        ("heatmap", "dow TINYINT, hr TINYINT, n INT, PRIMARY KEY(dow,hr)", ["dow", "hr", "n"], df(_csv("heatmap.csv").rename(columns={"day_of_week": "dow", "hour": "hr", "count": "n"}), ["dow", "hr", "n"])),
-        ("top_types", "tipe VARCHAR(60) PRIMARY KEY, n INT", ["tipe", "n"], df(_csv("top_types.csv").rename(columns={"primary_type": "tipe", "count": "n"}), ["tipe", "n"])),
-        ("district", "district INT PRIMARY KEY, n INT, arrest_rate DOUBLE", ["district", "n", "arrest_rate"], df(d["district"].rename(columns={"count": "n"}), ["district", "n", "arrest_rate"])),
-        ("next_day", "district INT PRIMARY KEY, day DATE, pred DOUBLE, p33 DOUBLE, p66 DOUBLE, risk VARCHAR(10)", ["district", "day", "pred", "p33", "p66", "risk"], df(d["next_day"], ["district", "day", "pred", "p33", "p66", "risk"])),
-        ("test_pred", "district INT, day DATE, n INT, prediction DOUBLE, KEY(day)", ["district", "day", "n", "prediction"], df(d["test_pred"], ["district", "day", "n", "prediction"])),
-        ("lag_corr", "lg INT PRIMARY KEY, corr DOUBLE", ["lg", "corr"], df(d["lag"], ["lg", "corr"])),
-        ("ext_corr", "factor VARCHAR(30), lg INT, corr DOUBLE, PRIMARY KEY(factor,lg)", ["factor", "lg", "corr"], df(d["ext"], ["factor", "lg", "corr"])),
-        ("model_metrics", "model VARCHAR(30) PRIMARY KEY, mae DOUBLE, rmse DOUBLE, r2 DOUBLE", ["model", "mae", "rmse", "r2"], df(d["model_metrics"], ["model", "mae", "rmse", "r2"])),
-        ("importance", "fitur VARCHAR(40) PRIMARY KEY, nilai DOUBLE", ["fitur", "nilai"], df(d["importance"], ["fitur", "nilai"])),
-        ("mr_dhh", "district INT, dow INT, hr INT, n INT, KEY(district)", ["district", "dow", "hr", "n"], df(d["mr_dhh"], ["district", "dow", "hr", "n"])),
-        ("preprocess", "dataset VARCHAR(20) PRIMARY KEY, rows_in INT, dup_identical INT, dup_key INT, rows_final INT, dropped_day DATE, hdfs_mb DOUBLE",
-         ["dataset", "rows_in", "dup_identical", "dup_key", "rows_final", "dropped_day", "hdfs_mb"],
-         [(n, v["rows_in"], v["dup_identical"], v["dup_key"], v["rows_final"], v["dropped_partial_day"], hd.get(f"{n}_raw_mb")) for n, v in d["m1"].items()]),
-        ("kpi", "k VARCHAR(30) PRIMARY KEY, v VARCHAR(40)", ["k", "v"],
-         [("total", k["total"]), ("arrest_rate", k["arrest_rate"]), ("domestic_pct", k["domestic_pct"]), ("first_day", m["first_day"]), ("last_day", m["last_day"]),
-          ("train_rows", m["train_rows"]), ("test_rows", m["test_rows"]), ("best_model", m.get("best_model")), ("total_raw_gb", hd["total_raw_gb"])]),
-        ("a_grid", "jenis VARCHAR(40), la DOUBLE, lo DOUBLE, n INT, KEY(jenis)", ["jenis", "la", "lo", "n"], df(d["grid"], ["jenis", "la", "lo", "n"])),
-        ("a_type_month", "jenis VARCHAR(40), bulan CHAR(7), n INT, KEY(jenis)", ["jenis", "bulan", "n"], df(d["bulan"], ["jenis", "bulan", "n"])),
-        ("a_type_hour", "jenis VARCHAR(40), dow TINYINT, hr TINYINT, n INT, KEY(jenis)", ["jenis", "dow", "hr", "n"], df(d["jam"], ["jenis", "dow", "hr", "n"])),
-        ("a_type_district", "jenis VARCHAR(40), district INT, n INT, KEY(jenis)", ["jenis", "district", "n"], df(d["tdist"], ["jenis", "district", "n"])),
-        ("a_type_profile", "jenis VARCHAR(40) PRIMARY KEY, n INT, arrest_rate DOUBLE, domestic_pct DOUBLE, top_district INT, top_share DOUBLE", ["jenis", "n", "arrest_rate", "domestic_pct", "top_district", "top_share"], df(d["profil"], ["jenis", "n", "arrest_rate", "domestic_pct", "top_district", "top_share"])),
-        ("a_type_corr", "a VARCHAR(40), b VARCHAR(40), corr DOUBLE, PRIMARY KEY(a,b)", ["a", "b", "corr"], df(d["korelasi"], ["a", "b", "corr"])),
-        ("a_meta", "k VARCHAR(30) PRIMARY KEY, v TEXT", ["k", "v"], [(a, ",".join(map(str, b)) if isinstance(b, list) else b) for a, b in d["meta"].items()]),
-    ]
+# ---------- unduhan hasil (CSV / ZIP) ----------
+def tabel_csv(d):
+    """{nama: DataFrame} semua hasil pipeline yang bisa diunduh sebagai CSV."""
+    kv = lambda x: pd.DataFrame({"kunci": list(x), "nilai": list(x.values())})
+    t = {k: v for k, v in d.items() if isinstance(v, pd.DataFrame)}
+    t["kpi"] = kv(d["kpi"])
+    t["hdfs"] = kv(d["hdfs"])
+    t["preprocess"] = pd.DataFrame(d["m1"]).T.rename_axis("dataset").reset_index()
+    t["meta"] = pd.DataFrame({"kunci": list(d["meta"]), "nilai": [",".join(map(str, v)) if isinstance(v, list) else v for v in d["meta"].values()]})
     return t
 
 
-def impor_mysql(d=None):
-    """Hapus dan buat ulang tabel chicago_bigdata. Kembalikan daftar 'tabel: N baris'."""
+def insight_md(d):
+    """Ringkasan hasil dalam Markdown, dari data yang sudah dimuat."""
+    m, k = d["metrics"], d["kpi"]
+    mm = d["model_metrics"]
+    base = mm[mm["model"] == "baseline_mean7"]["rmse"]
+    top = mm.iloc[0]
+    L = ["# Ringkasan hasil Chicago Crime", "",
+         f"- Periode: {m['first_day']} s.d. {m['last_day']}; total kejadian {int(k['total']):,}".replace(",", "."),
+         f"- Tingkat penangkapan {k['arrest_rate'] * 100:.1f}%, kasus domestik {k['domestic_pct'] * 100:.1f}%",
+         f"- Model terbaik: {top['model']} (RMSE {top['rmse']:.2f}, R2 {top['r2']:.2f})"
+         + (f"; baseline rata-rata 7 hari RMSE {base.iloc[0]:.2f}" if len(base) else ""),
+         f"- Tambahan fitur 311 dan kecelakaan mengubah RMSE {m.get('ext_gain_rmse_pct', 0):+.2f}% (negatif = tidak membantu)",
+         "", "## Jenis kejahatan terbanyak"]
+    p = d["profil"].sort_values("n", ascending=False).head(5)
+    L += [f"{i}. {r.jenis}: {int(r.n):,} kejadian".replace(",", ".") for i, r in enumerate(p.itertuples(), 1)]
+    L += ["", "## 5 titik terpanas (lintang, bujur, kejadian)"]
+    L += [f"- {q['la']:.3f}, {q['lo']:.3f}: {q['n']}" for q in titik_terpanas(d["grid"].groupby(["la", "lo"], as_index=False)["n"].sum())]
+    L += ["", "## Prakiraan besok (district dengan prediksi tertinggi)"]
+    L += [f"- District {int(r.district)}: {r.pred:.1f} kejadian, risiko {r.risk}" for r in kartu_risiko(d["next_day"]).head(5).itertuples()]
+    L += ["", "Prakiraan statistik, bukan kepastian."]
+    return "\n".join(L) + "\n"
+
+
+def zip_hasil(d=None):
+    """ZIP berisi insight.md dan satu CSV per tabel (utf-8-sig agar terbuka benar di Excel)."""
+    import io, zipfile
     d = d or muat()
-    c = _koneksi()
-    log = []
-    try:
-        with c.cursor() as cur:
-            for t, ddl, cols, rows in skema_tabel(d):
-                cur.execute(f"DROP TABLE IF EXISTS {t}")
-                cur.execute(f"CREATE TABLE {t} ({ddl}) ENGINE=InnoDB")
-                if rows:
-                    cur.executemany(f"INSERT INTO {t} ({','.join(cols)}) VALUES ({','.join(['%s'] * len(cols))})", [tuple(None if (isinstance(x, float) and math.isnan(x)) else (x.item() if hasattr(x, "item") else x) for x in r) for r in rows])
-                log.append(f"{t}: {len(rows)} baris")
-            cur.execute("CREATE TABLE IF NOT EXISTS job_runs (id INT AUTO_INCREMENT PRIMARY KEY, job VARCHAR(30), status VARCHAR(12), started DATETIME, finished DATETIME NULL, log_file VARCHAR(80))")
-        c.commit()
-    finally:
-        c.close()
-    return log
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("insight.md", insight_md(d))
+        for n, df in tabel_csv(d).items():
+            z.writestr(f"{n}.csv", df.to_csv(index=False, encoding="utf-8-sig"))
+    return buf.getvalue()
 
 
 # ---------- halaman Kode ----------

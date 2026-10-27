@@ -21,7 +21,7 @@ Lokasi semua kode: repo WSL `~/tugas-akhir-bigdata` = `\\wsl.localhost\Ubuntu\ho
 | `src/bi.py` | Spark: KPI, harian, mingguan, heatmap, top jenis, korelasi lag | -> `data/bi/*` |
 | `src/analisis.py` | Spark: peta sel, jenis x bulan/jam/district, profil, korelasi jenis | -> `data/analisis/*` |
 | `src/ml.py` | MLlib: prediksi harian per district, risiko H+1 | -> `data/ml/*` |
-| `src/export_web.py` | Salin hasil ke `web_export/` untuk impor MySQL | -> `web_export/` |
+| `src/export_web.py` | Salin hasil ke `web_export/` | -> `web_export/` |
 | `src/ingest.py`, `src/preprocess.py` | Pembantu: `get_spark()`, konstanta `HDFS` | - |
 
 ## Penjelasan sintaks per file

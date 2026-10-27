@@ -1,6 +1,6 @@
 # Chicago Crime Safety Insight
 
-Tugas Akhir Big Data & Analitik. Aplikasi web yang menganalisis dan memprediksi kejahatan kota Chicago dari data terbuka, dibangun di atas pipeline Big Data lengkap: **NiFi, HDFS, MapReduce (YARN), Spark/MLlib, Streamlit, dan MySQL**.
+Tugas Akhir Big Data & Analitik. Aplikasi web yang menganalisis dan memprediksi kejahatan kota Chicago dari data terbuka, dibangun di atas pipeline Big Data lengkap: **NiFi, HDFS, MapReduce (YARN), Spark/MLlib, dan Streamlit**.
 
 Repositori: https://github.com/hasanhuzaifi/Tugas-Akhir-Big-data-analitik
 
@@ -51,7 +51,7 @@ Web Modul 1 (pilih dataset + periode -> link Socrata disusun otomatis)
   -> MapReduce prep (Hadoop Streaming, YARN)  -> /data/clean (TSV)
   -> Spark load_parquet                       -> /data/processed (Parquet)
   -> MapReduce crime_dhh + Spark bi / analisis / ml
-  -> export_web -> MySQL -> Web Modul 2 (Di mana, Apa dan kapan, Besok)
+  -> export_web -> web_export/ -> Web Modul 2 (Di mana, Apa dan kapan, Besok)
 ```
 Tombol job di web (Streamlit) menjalankan skrip `.py` / `.sh` di WSL lewat `subprocess` dengan daftar job yang diizinkan (whitelist).
 
@@ -65,7 +65,7 @@ src/
   bi.py             KPI, tren, heatmap, korelasi lag
   analisis.py       peta sel, jenis x bulan/jam/district, korelasi jenis
   ml.py             fitur lag, GBT dan RandomForest, risiko H+1
-  export_web.py     hasil -> berkas untuk impor MySQL
+  export_web.py     hasil -> CSV/JSON di web_export/
 tests/              test_app.py, test_m1.py, test_bi.py, test_mr.py
 app/                aplikasi Streamlit: streamlit_app.py, inti.py, halaman/ (beranda, modul1, modul2, kode)
 web_export/         hasil analisis (CSV/JSON/TSV) yang dibaca aplikasi (Jalur A)
@@ -87,7 +87,7 @@ Kebutuhan: Python 3.10+ (Windows/Linux/macOS).
    python -m venv .venv && .venv/bin/pip install -r requirements.txt   # Windows: .venv\Scripts\pip
    ```
 2. Jalankan: `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501`, lalu buka `http://localhost:8501`.
-3. Yang bisa dicoba tanpa pipeline: Beranda, **Modul 2** (Di mana, Apa dan kapan, Besok), **Kode**. Tombol job di Modul 1 butuh pipeline (Jalur B). Tombol Impor ke MySQL butuh MySQL (`MYSQL_USER`, `MYSQL_PASSWORD`; database `chicago_bigdata`).
+3. Yang bisa dicoba tanpa pipeline: Beranda, **Modul 2** (Di mana, Apa dan kapan, Besok), **Kode**. Tombol job di Modul 1 butuh pipeline (Jalur B). Tombol **Unduh hasil (ZIP)** (insight.md + semua CSV) dan unduh CSV per tabel ada di Modul 1 bagian 3.
 
 ### Jalur B: pipeline penuh
 Kebutuhan:
@@ -95,7 +95,6 @@ Kebutuhan:
 - Java 17 (Hadoop/Spark) di WSL; JDK 21 atau lebih baru di Windows untuk NiFi 2.12
 - Hadoop 3.5 (HDFS + YARN, mode pseudo-distributed), Spark 4.0, NiFi 2.12
 - Python 3.10+ dengan `pyspark==4.0.0`, `pandas`, `pyarrow` (`pip install -r requirements.txt`)
-- MySQL (opsional, untuk tombol Impor ke MySQL)
 
 Langkah:
 1. **Klon repo ke WSL**: `git clone https://github.com/hasanhuzaifi/Tugas-Akhir-Big-data-analitik.git ~/tugas-akhir-bigdata`
@@ -106,7 +105,7 @@ ifi` agar path tanpa spasi dan `&`), salin dua NAR Hadoop ke `lib\`, atur login 
 ifi` agar path tanpa spasi dan `&`), salin `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 ke `lib\`, atur login `java -cp "libootstrap\*;conf" org.apache.nifi.authentication.single.user.command.SetSingleUserCredentials <user> <sandi>` (sandi minimal 12 karakter), lalu `hidupkan_nifi.ps1`. NiFi di Windows tetap menulis ke HDFS di WSL (`localhost:9000`, mirrored networking). Alternatif NiFi di WSL: pasang `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 (Maven Central) ke `$NIFI_HOME/lib` agar `PutHDFS` tersedia, lalu `nifi.sh start`. Buka `https://localhost:8443/nifi`.
 5. **Bangun flow**: `NIFI_USER=<user> NIFI_PASS=<sandi> python3 nifi/build_flow.py` (NiFi Windows: tambah `NIFI_HOST=windows`), lalu jalankan semua processor di UI **kecuali** `GenerateFlowFile` (biarkan STOPPED; kalau hidup, ia mengunduh semua bulan sekaligus). `nifi/flow.json` adalah hasil ekspor flow.
 6. **Daemon harus hidup**: HDFS, YARN, dan NiFi (bila di WSL) mati bila sesi WSL berakhir. Bila disk C hampir penuh (<1 GB) `wslservice.exe` crash dan WSL keluar sendiri: kosongkan `C:\Windows\SoftwareDistribution\Download` (admin) lalu `wsl --update`. Jalankan di terminal WSL yang tetap terbuka, atau pakai `exec sleep infinity` di akhir perintah.
-7. **Aplikasi**: `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` (impor MySQL opsional).
+7. **Aplikasi**: `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501`.
 8. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan bulan (rentang kustom ada di Lanjutan), klik **Ambil data pilihan** (akuisisi: NiFi ke HDFS; perkiraan ukuran tampil), lalu **Jalankan preprocessing** (MapReduce prep di YARN, lalu Parquet). Tombol **Unduh paket lebih dari 1 GB** menarik tiga dataset seluruh periode (±1,7 GB, syarat dosen). Analisis dan ML dijalankan tombol terpisah di bagian 3. Atau jalankan tahap manual di WSL:
    ```bash
    bash src/pipeline.sh crime        # crime | crashes | 311 | all

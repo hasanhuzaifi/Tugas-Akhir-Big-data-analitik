@@ -64,8 +64,10 @@ if i.siap():
     d = i.muat()
     jn = i.daftar_jenis(d)
     assert len(jn) >= 12 and set(i.warna_jenis(d)) == set(jn)
-    tb = i.skema_tabel(d)
-    assert {t[0] for t in tb} >= {"kpi", "a_grid", "mr_dhh", "next_day", "preprocess", "a_meta"}
-    assert all(len(r) == len(cols) for _, _, cols, rows in tb for r in rows[:50])
+    tb = i.tabel_csv(d)
+    assert set(tb) >= {"kpi", "grid", "mr_dhh", "next_day", "preprocess", "meta", "model_metrics"} and all(len(x) for x in tb.values())
+    import io, zipfile
+    z = zipfile.ZipFile(io.BytesIO(i.zip_hasil(d)))
+    assert "insight.md" in z.namelist() and "grid.csv" in z.namelist() and "RMSE" in z.read("insight.md").decode()
     assert len(i.kartu_risiko(d["next_day"])) > 0 and d["model_metrics"].iloc[0]["rmse"] < 7
 print("test_app OK")

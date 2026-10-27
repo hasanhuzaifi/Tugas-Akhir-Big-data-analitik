@@ -1,4 +1,4 @@
-"""Ekspor hasil Parquet/JSON ke CSV agar aplikasi Streamlit dan impor MySQL dapat membacanya. Keluaran: web_export/"""
+"""Ekspor hasil Parquet/JSON ke CSV agar aplikasi Streamlit dapat membacanya. Keluaran: web_export/"""
 import os, shutil, pandas as pd
 O = "web_export"; os.makedirs(O, exist_ok=True)
 for n in ["daily", "weekly", "heatmap", "top_types", "district"]:

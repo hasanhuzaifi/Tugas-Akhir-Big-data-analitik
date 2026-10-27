@@ -12,7 +12,7 @@ LANGKAH = [("Akuisisi", "NiFi + PutHDFS", "API Socrata ditarik per bulan oleh Ni
            ("Pemrosesan", "MapReduce di YARN", "Hadoop Streaming menghitung kejadian per district, hari, jam."),
            ("Analisis BI", "PySpark SQL", "Sebaran lokasi, perbandingan jenis, korelasi, tren."),
            ("Machine learning", "Spark MLlib", "RandomForest dan GBT memprediksi kejadian per district per hari."),
-           ("Tampilan", "Streamlit + MySQL", "Hasil dibaca langsung dari export; bisa diimpor ke MySQL.")]
+           ("Tampilan", "Streamlit", "Hasil dibaca langsung dari export; bisa diunduh sebagai CSV atau ZIP.")]
 
 a, b = st.columns([1, 1])
 with a:

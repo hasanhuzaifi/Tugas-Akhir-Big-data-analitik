@@ -2,7 +2,7 @@ import datetime as dt
 
 import pandas as pd
 import streamlit as st
-from _job import impor, jalan_sekarang, log_job, mulai, panel_job, stepper
+from _job import jalan_sekarang, log_job, mulai, panel_job, stepper
 from _umum import data, inti
 
 nf = inti.nf
@@ -140,14 +140,20 @@ with st.container(border=True):
 
 # ---------- 3. analisis, ML, database ----------
 with st.container(border=True):
-    st.subheader("3. Analisis, ML, dan database")
-    st.caption("Satu tombol menjalankan MapReduce, analisis BI, machine learning, dan ekspor. Lalu impor hasilnya ke MySQL (`chicago_bigdata`).")
-    c = st.columns(2)
-    if c[0].button("Jalankan analisis dan ML", disabled=jalan_sekarang(), key="analitik"):
+    st.subheader("3. Analisis, ML, dan unduhan")
+    st.caption("Satu tombol menjalankan MapReduce, analisis BI, machine learning, dan ekspor. Lalu unduh hasilnya sebagai CSV atau ZIP (berisi insight.md).")
+    if st.button("Jalankan analisis dan ML", disabled=jalan_sekarang(), key="analitik"):
         mulai("analitik", "all")
         st.rerun()
-    if c[1].button("Impor ke MySQL", key="impor1"):
-        impor()
+    if inti.siap():
+        d = inti.muat()
+        tb = inti.tabel_csv(d)
+        c = st.columns(3)
+        c[0].download_button("Unduh semua (ZIP)", inti.zip_hasil(d), "hasil_chicago_crime.zip", "application/zip", type="primary", use_container_width=True)
+        n = c[1].selectbox("Tabel", list(tb), label_visibility="collapsed")
+        c[2].download_button(f"Unduh {n}.csv", tb[n].to_csv(index=False, encoding="utf-8-sig"), f"{n}.csv", "text/csv", use_container_width=True)
+    else:
+        st.info("Belum ada hasil untuk diunduh. Jalankan analisis dan ML dulu.")
 
 st.subheader("Log job")
 log_job()
