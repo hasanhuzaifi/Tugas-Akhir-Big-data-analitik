@@ -183,3 +183,6 @@ curl -X POST "localhost:8010/api/jobs/xyz"     # 404
 - Resolusi spasial sel peta sekitar 0,5 km; pembaruan data masih lewat link manual, belum terjadwal harian.
 - Setup penuh (Jalur B) cukup berat dan dibuat untuk satu mesin; konfigurasi jalur (`config/jobs.php`) perlu disesuaikan di mesin lain.
 - Salinan lokal PutFile menggandakan kebutuhan disk data mentah.
+
+## Aplikasi (Streamlit)
+Web kini Streamlit (folder `app/`): `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` lalu buka http://localhost:8501. Tes: `PYTHONPATH=. .venv/bin/python tests/test_app.py`. Versi PHP + Laravel lama tetap di `web/` sebagai cadangan.
