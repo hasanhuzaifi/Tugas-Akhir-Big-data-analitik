@@ -1,0 +1,53 @@
+{
+  "first_day": "2023-10-25",
+  "last_day": "2026-10-15",
+  "train_rows": 15893,
+  "test_rows": 8395,
+  "baseline_mean7": {
+    "mae": 5.1145,
+    "rmse": 6.7636,
+    "r2": 0.6593
+  },
+  "gbt_base": {
+    "mae": 5.3082,
+    "rmse": 7.3426,
+    "r2": 0.5985
+  },
+  "rf_base": {
+    "mae": 4.9379,
+    "rmse": 6.5026,
+    "r2": 0.6851
+  },
+  "gbt_full": {
+    "mae": 5.4084,
+    "rmse": 7.4285,
+    "r2": 0.589
+  },
+  "importance_gbt_full": {
+    "mean_30": 0.3821,
+    "district": 0.1028,
+    "lag_1": 0.0409,
+    "building_viol_7d": 0.0403,
+    "mean_7": 0.0384,
+    "lag_14": 0.0369,
+    "abandoned_veh_7d": 0.0356,
+    "streetlight_7d": 0.0344,
+    "day_of_week": 0.0338,
+    "lag_7": 0.0336,
+    "month": 0.0328,
+    "dumping_7d": 0.0328,
+    "rodent_7d": 0.0314,
+    "crash_inj_7d": 0.0308,
+    "sr_all_7d": 0.0305,
+    "graffiti_7d": 0.0293,
+    "crash_n_7d": 0.0261,
+    "is_weekend": 0.0075
+  },
+  "rf_full": {
+    "mae": 4.9647,
+    "rmse": 6.5213,
+    "r2": 0.6833
+  },
+  "best_model": "rf_base",
+  "ext_gain_rmse_pct": -1.17
+}

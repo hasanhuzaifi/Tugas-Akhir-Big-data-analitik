@@ -43,7 +43,7 @@ Tiga dataset dari `data.cityofchicago.org`, rentang 3 tahun (2023-10-25 sampai 2
 ## Arsitektur
 ```
 Web Modul 1 (pilih dataset + periode -> link Socrata disusun otomatis)
-  -> PHP validasi (host data.cityofchicago.org + 3 resource)
+  -> validasi Python (host data.cityofchicago.org + 3 resource)
   -> NiFi ListenHTTP :8081 /ingest   (baris "dataset|nama|url")
   -> SplitText -> ExtractText -> InvokeHTTP -> UpdateAttribute
   -> PutFile   data/landing/<dataset>   (salinan lokal)
@@ -66,32 +66,28 @@ src/
   analisis.py       peta sel, jenis x bulan/jam/district, korelasi jenis
   ml.py             fitur lag, GBT dan RandomForest, risiko H+1
   export_web.py     hasil -> berkas untuk impor MySQL
-tests/              test_m1.py, test_bi.py, test_mr.py
-web/                aplikasi web Laragon (PHP): index, modul1, modul2, kode, jobs.php, setup.php
-web/data/           hasil analisis siap impor (CSV/JSON/TSV) untuk Jalur A
+tests/              test_app.py, test_m1.py, test_bi.py, test_mr.py
+app/                aplikasi Streamlit: streamlit_app.py, inti.py, halaman/ (beranda, modul1, modul2, kode)
+web_export/         hasil analisis (CSV/JSON/TSV) yang dibaca aplikasi (Jalur A)
 docs/               peta-kode-spark.md (lokasi dan penjelasan sintaks semua skrip)
 data/bi, data/ml    keluaran analisis dan metrik model
 ```
 
 ## Cara mencoba
 
-### Jalur A: hanya melihat web (10 menit)
-Tidak butuh Hadoop, Spark, atau NiFi. Hasil analisis sudah ada di `web/data/`.
+### Jalur A: hanya melihat aplikasi (10 menit)
+Tidak butuh Hadoop, Spark, atau NiFi. Hasil analisis sudah ada di `web_export/`.
 
-Kebutuhan: Windows/Linux/macOS dengan **Laragon** (Apache + MySQL + PHP 8.2+) atau PHP dan MySQL biasa.
+Kebutuhan: Python 3.10+ (Windows/Linux/macOS).
 
-1. Klon repo:
+1. Klon repo dan pasang dependensi:
    ```bash
    git clone https://github.com/hasanhuzaifi/Tugas-Akhir-Big-data-analitik.git
+   cd Tugas-Akhir-Big-data-analitik
+   python -m venv .venv && .venv/bin/pip install -r requirements.txt   # Windows: .venv\Scripts\pip
    ```
-2. Salin folder `web/` ke `C:\laragon\www\chicago-crime\` (Laragon), atau pakai server bawaan PHP.
-3. Nyalakan **MySQL** (user `root`, tanpa sandi, bawaan Laragon). Sesuaikan di `web/lib.php` bila sandi Anda berbeda.
-4. Impor data ke MySQL (membuat database `chicago_bigdata`):
-   ```bash
-   php web/setup.php          # di folder repo, atau buka http://localhost/chicago-crime/setup.php
-   ```
-5. Buka `http://localhost/chicago-crime/` (atau `php -S 127.0.0.1:8099 -t web`, lalu `http://127.0.0.1:8099`).
-6. Yang bisa dicoba tanpa pipeline: Beranda, **Modul 2** (Di mana, Apa dan kapan, Besok). Tombol job di Modul 1 dan halaman **Kode** butuh pipeline (lihat Jalur B).
+2. Jalankan: `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501`, lalu buka `http://localhost:8501`.
+3. Yang bisa dicoba tanpa pipeline: Beranda, **Modul 2** (Di mana, Apa dan kapan, Besok), **Kode**. Tombol job di Modul 1 butuh pipeline (Jalur B). Tombol Impor ke MySQL butuh MySQL (`MYSQL_USER`, `MYSQL_PASSWORD`; database `chicago_bigdata`).
 
 ### Jalur B: pipeline penuh
 Kebutuhan:
@@ -110,7 +106,7 @@ ifi` agar path tanpa spasi dan `&`), salin dua NAR Hadoop ke `lib\`, atur login 
 ifi` agar path tanpa spasi dan `&`), salin `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 ke `lib\`, atur login `java -cp "libootstrap\*;conf" org.apache.nifi.authentication.single.user.command.SetSingleUserCredentials <user> <sandi>` (sandi minimal 12 karakter), lalu `hidupkan_nifi.ps1`. NiFi di Windows tetap menulis ke HDFS di WSL (`localhost:9000`, mirrored networking). Alternatif NiFi di WSL: pasang `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 (Maven Central) ke `$NIFI_HOME/lib` agar `PutHDFS` tersedia, lalu `nifi.sh start`. Buka `https://localhost:8443/nifi`.
 5. **Bangun flow**: `NIFI_USER=<user> NIFI_PASS=<sandi> python3 nifi/build_flow.py` (NiFi Windows: tambah `NIFI_HOST=windows`), lalu jalankan semua processor di UI **kecuali** `GenerateFlowFile` (biarkan STOPPED; kalau hidup, ia mengunduh semua bulan sekaligus). `nifi/flow.json` adalah hasil ekspor flow.
 6. **Daemon harus hidup**: HDFS, YARN, dan NiFi (bila di WSL) mati bila sesi WSL berakhir. Bila disk C hampir penuh (<1 GB) `wslservice.exe` crash dan WSL keluar sendiri: kosongkan `C:\Windows\SoftwareDistribution\Download` (admin) lalu `wsl --update`. Jalankan di terminal WSL yang tetap terbuka, atau pakai `exec sleep infinity` di akhir perintah.
-7. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
+7. **Aplikasi**: `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` (impor MySQL opsional).
 8. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan bulan (rentang kustom ada di Lanjutan), klik **Ambil data pilihan** (akuisisi: NiFi ke HDFS; perkiraan ukuran tampil), lalu **Jalankan preprocessing** (MapReduce prep di YARN, lalu Parquet). Tombol **Unduh paket lebih dari 1 GB** menarik tiga dataset seluruh periode (±1,7 GB, syarat dosen). Analisis dan ML dijalankan tombol terpisah di bagian 3. Atau jalankan tahap manual di WSL:
    ```bash
    bash src/pipeline.sh crime        # crime | crashes | 311 | all
@@ -157,7 +153,7 @@ PYTHONPATH=. .venv/bin/python -m tests.test_mr             # total MapReduce = S
 | Tombol job tidak bereaksi | Streamlit belum jalan | `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` |
 | Kirim link: NiFi tidak terjangkau | NiFi mati atau ListenHTTP berhenti | WSL: `bash siapkan_layanan.sh`; cadangan Windows: `hidupkan_nifi.ps1`; lalu jalankan processor |
 | NiFi mengunduh semua bulan | `GenerateFlowFile` hidup | Hentikan processor itu |
-| Halaman Modul 2 kosong | MySQL belum terisi | `php web/setup.php` |
+| Halaman Modul 2 kosong | `web_export/` kosong | Jalankan Analisis dan ML (Modul 2) atau pulihkan `web_export/` dari repo |
 | Job gagal dengan jalur aneh | Spasi atau `&` di `run_dir` | Pakai jalur tanpa spasi, mis. `C:/Temp/bigdata-web` |
 | OOM / `/tmp` penuh pada 311 | Spark memakai tmpfs | `spark.local.dir` ke disk, `local[2]`, 16 shuffle partition (sudah di kode) |
 | Memori sistem habis | Hadoop + Spark + NiFi bersamaan | Tutup aplikasi lain, naikkan memori WSL (`.wslconfig`) |
@@ -166,8 +162,8 @@ PYTHONPATH=. .venv/bin/python -m tests.test_mr             # total MapReduce = S
 - Prakiraan harian berbasis pola historis; cuaca dan acara kota belum dimasukkan.
 - Data hanya mencakup kejadian yang dilaporkan, sehingga ada bias pelaporan.
 - Resolusi spasial sel peta sekitar 0,5 km; pembaruan data masih lewat link manual, belum terjadwal harian.
-- Setup penuh (Jalur B) cukup berat dan dibuat untuk satu mesin; konfigurasi jalur (`config/jobs.php`) perlu disesuaikan di mesin lain.
+- Setup penuh (Jalur B) cukup berat dan dibuat untuk satu mesin; path di `app/inti.py` dan `nifi/build_flow.py` perlu disesuaikan di mesin lain.
 - Salinan lokal PutFile menggandakan kebutuhan disk data mentah.
 
 ## Aplikasi (Streamlit)
-Web kini Streamlit (folder `app/`): `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` lalu buka http://localhost:8501. Tes: `PYTHONPATH=. .venv/bin/python tests/test_app.py`. Versi PHP lama tetap di `web/` sebagai arsip (lapisan Laravel sudah dihapus, jadi tombol job di sana tidak berfungsi).
+Aplikasi berupa Streamlit (folder `app/`): `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` lalu buka http://localhost:8501. Tes: `PYTHONPATH=. .venv/bin/python tests/test_app.py`.

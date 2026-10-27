@@ -91,7 +91,7 @@ Lokasi semua kode: repo WSL `~/tugas-akhir-bigdata` = `\\wsl.localhost\Ubuntu\ho
 - `percentile_approx(n, 0.33/0.66)`: ambang risiko Rendah/Sedang/Tinggi per district.
 
 ### `src/export_web.py`
-- `pd.read_parquet(...).to_csv(...)` dan `shutil.copy`: kumpulkan hasil ke `web_export/` untuk `jobs.php?a=sync`.
+- `pd.read_parquet(...).to_csv(...)` dan `shutil.copy`: kumpulkan hasil ke `web_export/`.
 
 ### `src/ingest.py` dan `src/preprocess.py`
 - `preprocess.py`: `get_spark()` membuat SparkSession lokal (`master local[2]`, memori driver 6g) dan konstanta `HDFS`; dipakai `load_parquet`, `bi`, `analisis`.

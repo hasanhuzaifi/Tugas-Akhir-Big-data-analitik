@@ -1,6 +1,6 @@
 #!/bin/bash
 # Pipeline lengkap setelah NiFi menaruh CSV di /data/raw: MapReduce prep -> Parquet -> MapReduce crime_dhh -> BI -> analisis -> ML -> ekspor web.
-# Pakai: src/pipeline.sh [crime|crashes|311|all]. Penanda __STEP__<nama> dibaca web (jobs.php) untuk stepper.
+# Pakai: src/pipeline.sh [crime|crashes|311|all]. Penanda __STEP__<nama> dibaca aplikasi Streamlit untuk stepper.
 set -e
 cd "$(dirname "$0")/.."
 PY=.venv/bin/python

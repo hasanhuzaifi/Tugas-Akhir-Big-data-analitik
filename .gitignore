@@ -10,4 +10,3 @@ metastore_db/
 derby.log
 
 .env
-web_export/

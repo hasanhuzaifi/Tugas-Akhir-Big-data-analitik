@@ -1,0 +1,162 @@
+[
+  {
+    "factor": "sr_all",
+    "lag": 0,
+    "corr": 0.041032753659783865
+  },
+  {
+    "factor": "sr_all",
+    "lag": 7,
+    "corr": 0.025036514680953696
+  },
+  {
+    "factor": "sr_all",
+    "lag": 14,
+    "corr": 0.06624516271609054
+  },
+  {
+    "factor": "sr_all",
+    "lag": 30,
+    "corr": 0.12056237799644759
+  },
+  {
+    "factor": "graffiti",
+    "lag": 0,
+    "corr": 0.06354162352400688
+  },
+  {
+    "factor": "graffiti",
+    "lag": 7,
+    "corr": -0.016236301997544746
+  },
+  {
+    "factor": "graffiti",
+    "lag": 14,
+    "corr": 0.016168029712425362
+  },
+  {
+    "factor": "graffiti",
+    "lag": 30,
+    "corr": 0.06081038952923315
+  },
+  {
+    "factor": "streetlight",
+    "lag": 0,
+    "corr": 0.13080970486061141
+  },
+  {
+    "factor": "streetlight",
+    "lag": 7,
+    "corr": 0.1051824904175573
+  },
+  {
+    "factor": "streetlight",
+    "lag": 14,
+    "corr": 0.1323770458500226
+  },
+  {
+    "factor": "streetlight",
+    "lag": 30,
+    "corr": 0.13668679847659285
+  },
+  {
+    "factor": "abandoned_veh",
+    "lag": 0,
+    "corr": 0.0013290603407088758
+  },
+  {
+    "factor": "abandoned_veh",
+    "lag": 7,
+    "corr": -0.06677078934904776
+  },
+  {
+    "factor": "abandoned_veh",
+    "lag": 14,
+    "corr": -0.03881598600451924
+  },
+  {
+    "factor": "abandoned_veh",
+    "lag": 30,
+    "corr": 0.058688382978355505
+  },
+  {
+    "factor": "building_viol",
+    "lag": 0,
+    "corr": 0.03307767638448054
+  },
+  {
+    "factor": "building_viol",
+    "lag": 7,
+    "corr": 0.0486548963595077
+  },
+  {
+    "factor": "building_viol",
+    "lag": 14,
+    "corr": 0.0868190528169451
+  },
+  {
+    "factor": "building_viol",
+    "lag": 30,
+    "corr": 0.15773022326342578
+  },
+  {
+    "factor": "dumping",
+    "lag": 0,
+    "corr": 0.18858958771636514
+  },
+  {
+    "factor": "dumping",
+    "lag": 7,
+    "corr": 0.105277005419603
+  },
+  {
+    "factor": "dumping",
+    "lag": 14,
+    "corr": 0.12016222804766484
+  },
+  {
+    "factor": "dumping",
+    "lag": 30,
+    "corr": 0.1852159215682953
+  },
+  {
+    "factor": "rodent",
+    "lag": 0,
+    "corr": 0.323954348848361
+  },
+  {
+    "factor": "rodent",
+    "lag": 7,
+    "corr": 0.263166570959911
+  },
+  {
+    "factor": "rodent",
+    "lag": 14,
+    "corr": 0.2570779678245874
+  },
+  {
+    "factor": "rodent",
+    "lag": 30,
+    "corr": 0.2979120685196322
+  },
+  {
+    "factor": "crash_n",
+    "lag": 0,
+    "corr": 0.2333115256514516
+  },
+  {
+    "factor": "crash_n",
+    "lag": 7,
+    "corr": 0.2034721595527926
+  },
+  {
+    "factor": "crash_n",
+    "lag": 14,
+    "corr": 0.2372481465470859
+  },
+  {
+    "factor": "crash_n",
+    "lag": 30,
+    "corr": 0.19849189972052944
+  }
+]

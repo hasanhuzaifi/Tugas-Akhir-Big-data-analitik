@@ -1,0 +1,21 @@
+{
+  "cell_deg": 0.005,
+  "top": [
+    "THEFT",
+    "BATTERY",
+    "CRIMINAL DAMAGE",
+    "ASSAULT",
+    "MOTOR VEHICLE THEFT",
+    "OTHER OFFENSE",
+    "DECEPTIVE PRACTICE",
+    "BURGLARY",
+    "ROBBERY",
+    "NARCOTICS",
+    "WEAPONS VIOLATION",
+    "CRIMINAL TRESPASS"
+  ],
+  "rows": 730571,
+  "rows_mapped": 724472,
+  "rows_no_coord": 6099,
+  "cells": 2548
+}

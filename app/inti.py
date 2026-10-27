@@ -1,5 +1,5 @@
 """Logika bersama aplikasi Streamlit: data, validasi link, job, impor MySQL, rumus peta/ML.
-Port dari web PHP (jobs.php, lib.php, JS modul2). Tanpa import streamlit supaya bisa diuji."""
+Logika aplikasi. Tanpa import streamlit supaya bisa diuji."""
 import hashlib, json, math, os, re, subprocess, time, urllib.parse, urllib.request
 from pathlib import Path
 
@@ -22,7 +22,7 @@ HARI = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"]
 HARI_PENUH = ["", "Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
 STOPS = ["#FFF3B0", "#FDBE4B", "#F26B38", "#C4262E", "#6E0F1A"]
 
-# whitelist job (sama dengan jobs.php::$JOBS); DS diganti dataset tervalidasi
+# whitelist job; DS diganti dataset tervalidasi
 JOBS = {
     "hdfs": ("Cek ukuran HDFS", f"{HADOOP} dfs -du -s -h /data/raw/crime /data/raw/crashes /data/raw/311"),
     "prep": ("Preprocessing MapReduce", "bash src/mr/run_prep.sh DS"),
@@ -215,7 +215,7 @@ def nilai_tebakan(g, s):
     return e, min(e, key=e.get)
 
 
-# ---------- validasi link (port jobs.php::normalisasi) ----------
+# ---------- validasi link ----------
 def normalisasi(masuk, dari="", sampai=""):
     """Kembalikan (dataset, nama, url, where) atau string pesan galat."""
     try:
@@ -393,7 +393,7 @@ def tahap_aktif(job, steps, done):
     return 5 if job == "preproses" and last == "selesai" else STEP_MAP.get(last, 3)
 
 
-# ---------- impor MySQL (port lib.php::import_all) ----------
+# ---------- impor MySQL ----------
 def _koneksi(buat_db=True):
     import pymysql
     kw = dict(host="127.0.0.1", port=3306, user=os.environ.get("MYSQL_USER", "root"), password=os.environ.get("MYSQL_PASSWORD", ""), charset="utf8mb4", autocommit=False)
@@ -406,7 +406,7 @@ def _koneksi(buat_db=True):
 
 
 def skema_tabel(d):
-    """[(tabel, ddl, kolom, baris)] sama dengan lib.php."""
+    """[(tabel, ddl, kolom, baris)]."""
     m, k, hd = d["metrics"], d["kpi"], d["hdfs"]
     df = lambda x, cols: [tuple(r) for r in x[cols].itertuples(index=False, name=None)]
     t = [
