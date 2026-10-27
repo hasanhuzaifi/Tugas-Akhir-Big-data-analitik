@@ -36,6 +36,9 @@ JOBS = {
     "analisis": ("Analisis lokasi dan jenis", ".venv/bin/python -m src.analisis"),
     "ml": ("Machine learning MLlib", ".venv/bin/python -m src.ml"),
     "export": ("Ekspor ke web", ".venv/bin/python -m src.export_web"),
+    "cek_hdfs": ("Cek HDFS", "bash src/demo/cek_hdfs.sh DS"),
+    "reset_hdfs": ("Reset data HDFS", "bash src/demo/reset.sh hdfs"),
+    "reset_semua": ("Reset penuh", "bash src/demo/reset.sh semua"),
 }
 STEP_MAP = {"prep": 3, "parquet": 4, "mapreduce": 5, "bi": 5, "analisis": 5, "ml": 6, "export": 7, "selesai": 8}
 

@@ -124,6 +124,18 @@ https://data.cityofchicago.org/resource/ijzp-q8t2.csv?$where=date between '2026-
 | **Modul 2: Analisis** | Tiap tahap diawali kotak **Kesimpulan** dan cara membaca. **Di mana**: peta panas halus yang bisa di-zoom dan layar penuh, slider radius dan ambang, daftar titik terpanas, mode Selisih antar jenis. **Apa dan kapan**: jenis x bulan/jam/district, pilihan cepat, korelasi. **Besok**: kartu risiko yang bisa disaring dan diklik (meter risiko, prakiraan vs kenyataan, jam rawan) serta permainan **Tebak dulu** |
 | **Kode** | Seluruh skrip PySpark, MapReduce, dan shell beserta lokasinya dan penjelasan sintaks |
 
+### Demo: monitor, cek HDFS, reset
+
+Skrip di `src/demo/` (jalankan dari WSL, root repo):
+
+```bash
+bash src/demo/reset.sh semua      # awal dan akhir demo: kosongkan HDFS, landing, web_export (hdfs = HDFS saja)
+bash src/demo/cek_hdfs.sh crime   # setelah ingest: ukuran HDFS vs landing, baris, _SUCCESS clean/processed
+bash src/demo/monitor.sh          # terminal kedua saat job jalan: jps, YARN, log job, ukuran HDFS
+```
+
+Aplikasi (Modul 1, bagian 4) punya tombol Cek HDFS, Reset HDFS, dan Reset penuh (dengan konfirmasi).
+
 ## Hasil utama
 - MapReduce dan Spark menghasilkan jumlah baris yang sama pada ketiga dataset.
 - Prediksi jumlah kejahatan harian: **RandomForest (fitur crime saja) RMSE 6,50** vs baseline rata-rata 7 hari **6,76**; RMSE terbaik semua model 6,52.

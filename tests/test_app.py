@@ -52,7 +52,7 @@ assert i.soal_tebak(sr, 0.999999)["t"] == "2026-01-20"
 e, menang = i.nilai_tebakan(7, sl)
 assert menang == "Anda" and e["Model"] == 5.5
 
-assert set(i.JOBS) >= {"hdfs", "preproses", "analitik", "export"}
+assert set(i.JOBS) >= {"hdfs", "preproses", "analitik", "export", "cek_hdfs", "reset_hdfs", "reset_semua"}
 try:
     i.jalankan_job("rm -rf")
     raise SystemExit("job asing harus ditolak")

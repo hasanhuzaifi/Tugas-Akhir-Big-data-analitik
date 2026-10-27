@@ -155,6 +155,29 @@ with st.container(border=True):
     else:
         st.info("Belum ada hasil untuk diunduh. Jalankan analisis dan ML dulu.")
 
+# ---------- 4. reset data demo ----------
+with st.container(border=True):
+    st.subheader("4. Cek HDFS dan reset data demo")
+    st.caption("Awal dan akhir demo: reset agar tidak ada duplikasi dan ruang disk kembali. Terminal WSL: bash /mnt/e/WSL/cek_demo.sh, reset_demo.sh, monitor_demo.sh.")
+    c = st.columns(3)
+    if c[0].button("Cek HDFS", disabled=jalan_sekarang(), key="cek_hdfs2", use_container_width=True):
+        mulai("cek_hdfs", ss.get("dsPipe", "all"))
+        st.rerun()
+    if c[1].button("Reset HDFS", disabled=jalan_sekarang(), key="rst_h", use_container_width=True):
+        ss["konfirm_reset"] = "reset_hdfs"
+    if c[2].button("Reset penuh", disabled=jalan_sekarang(), key="rst_p", use_container_width=True):
+        ss["konfirm_reset"] = "reset_semua"
+    if ss.get("konfirm_reset") and not jalan_sekarang():
+        penuh = ss["konfirm_reset"] == "reset_semua"
+        st.warning("Hapus data mentah, bersih, dan Parquet di HDFS" + (", salinan landing NiFi, dan hasil web_export (tampilan kosong sampai analisis dijalankan lagi)" if penuh else "") + "? Data harus diambil ulang lewat NiFi.")
+        y, n = st.columns(2)
+        if y.button("Ya, hapus", key="rst_ya"):
+            mulai(ss.pop("konfirm_reset"), "all")
+            st.rerun()
+        if n.button("Batal", key="rst_batal"):
+            ss["konfirm_reset"] = None
+            st.rerun()
+
 st.subheader("Log job")
 log_job()
 st.caption("Job butuh HDFS (dan YARN untuk MapReduce) hidup. Bila mati, aplikasi tetap menampilkan hasil tersimpan.")
