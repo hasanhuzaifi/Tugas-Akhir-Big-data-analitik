@@ -53,7 +53,7 @@ Web Modul 1 (pilih dataset + periode -> link Socrata disusun otomatis)
   -> MapReduce crime_dhh + Spark bi / analisis / ml
   -> export_web -> MySQL -> Web Modul 2 (Di mana, Apa dan kapan, Besok)
 ```
-Tombol job di web memanggil lapisan **Laravel** (`localhost:8010/api`) yang menjalankan skrip `.py` / `.sh` di WSL dengan daftar job yang diizinkan (whitelist).
+Tombol job di web (Streamlit) menjalankan skrip `.py` / `.sh` di WSL lewat `subprocess` dengan daftar job yang diizinkan (whitelist).
 
 ## Struktur repositori
 ```
@@ -69,7 +69,6 @@ src/
 tests/              test_m1.py, test_bi.py, test_mr.py
 web/                aplikasi web Laragon (PHP): index, modul1, modul2, kode, jobs.php, setup.php
 web/data/           hasil analisis siap impor (CSV/JSON/TSV) untuk Jalur A
-web/laravel-jobs/   Laravel 12: lapisan job (routes/api.php, JobController, config/jobs.php)
 docs/               peta-kode-spark.md (lokasi dan penjelasan sintaks semua skrip)
 data/bi, data/ml    keluaran analisis dan metrik model
 ```
@@ -92,7 +91,7 @@ Kebutuhan: Windows/Linux/macOS dengan **Laragon** (Apache + MySQL + PHP 8.2+) at
    php web/setup.php          # di folder repo, atau buka http://localhost/chicago-crime/setup.php
    ```
 5. Buka `http://localhost/chicago-crime/` (atau `php -S 127.0.0.1:8099 -t web`, lalu `http://127.0.0.1:8099`).
-6. Yang bisa dicoba tanpa pipeline: Beranda, **Modul 2** (Di mana, Apa dan kapan, Besok). Tombol job di Modul 1 dan halaman **Kode** butuh Laravel (lihat Jalur B, langkah 7).
+6. Yang bisa dicoba tanpa pipeline: Beranda, **Modul 2** (Di mana, Apa dan kapan, Besok). Tombol job di Modul 1 dan halaman **Kode** butuh pipeline (lihat Jalur B).
 
 ### Jalur B: pipeline penuh
 Kebutuhan:
@@ -100,7 +99,7 @@ Kebutuhan:
 - Java 17 (Hadoop/Spark) dan Java 21 (NiFi 2.12)
 - Hadoop 3.5 (HDFS + YARN, mode pseudo-distributed), Spark 4.0, NiFi 2.12
 - Python 3.10+ dengan `pyspark==4.0.0`, `pandas`, `pyarrow` (`pip install -r requirements.txt`)
-- Laragon (PHP 8.2, MySQL) dan Composer untuk Laravel
+- MySQL (opsional, untuk tombol Impor ke MySQL)
 
 Langkah:
 1. **Klon repo ke WSL**: `git clone https://github.com/hasanhuzaifi/Tugas-Akhir-Big-data-analitik.git ~/tugas-akhir-bigdata`
@@ -109,17 +108,8 @@ Langkah:
 4. **NiFi**: pasang `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 (Maven Central) ke `$NIFI_HOME/lib` agar `PutHDFS` tersedia, lalu `nifi.sh start`. Buka `https://localhost:8443/nifi`.
 5. **Bangun flow**: `NIFI_USER=<user> NIFI_PASS=<sandi> python3 nifi/build_flow.py`, lalu jalankan semua processor di UI **kecuali** `GenerateFlowFile` (biarkan STOPPED; kalau hidup, ia mengunduh semua bulan sekaligus). `nifi/flow.json` adalah hasil ekspor flow.
 6. **Daemon harus hidup**: HDFS, YARN, dan NiFi mati bila sesi WSL berakhir. Jalankan di terminal WSL yang tetap terbuka, atau pakai `exec sleep infinity` di akhir perintah.
-7. **Laravel (lapisan job)**:
-   ```powershell
-   cd web\laravel-jobs
-   composer install
-   copy .env.example .env
-   php artisan key:generate
-   php artisan serve --port=8010
-   ```
-   Sesuaikan `web/laravel-jobs/config/jobs.php`: `run_dir` (folder tanpa spasi dan `&`, mis. `C:/Temp/bigdata-web`), `repo_unc` (UNC repo di WSL), `vault_doc` (jalur ke `docs/peta-kode-spark.md`), dan nama distro pada perintah WSL jika bukan `Ubuntu`.
-8. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
-9. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan bulan (rentang kustom ada di Lanjutan), klik **Ambil data pilihan** (akuisisi: NiFi ke HDFS; perkiraan ukuran tampil), lalu **Jalankan preprocessing** (MapReduce prep di YARN, lalu Parquet). Tombol **Unduh paket lebih dari 1 GB** menarik tiga dataset seluruh periode (±1,7 GB, syarat dosen). Analisis dan ML dijalankan tombol terpisah di bagian 3. Atau jalankan tahap manual di WSL:
+7. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
+8. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan bulan (rentang kustom ada di Lanjutan), klik **Ambil data pilihan** (akuisisi: NiFi ke HDFS; perkiraan ukuran tampil), lalu **Jalankan preprocessing** (MapReduce prep di YARN, lalu Parquet). Tombol **Unduh paket lebih dari 1 GB** menarik tiga dataset seluruh periode (±1,7 GB, syarat dosen). Analisis dan ML dijalankan tombol terpisah di bagian 3. Atau jalankan tahap manual di WSL:
    ```bash
    bash src/pipeline.sh crime        # crime | crashes | 311 | all
    ```
@@ -145,8 +135,7 @@ https://data.cityofchicago.org/resource/ijzp-q8t2.csv?$where=date between '2026-
 - Metrik lengkap: `data/ml/metrics.json`; KPI dan korelasi: `data/bi/`.
 
 ## Detail teknis
-- **Pengawasan job**: log tiap job memuat penanda `__STEP__<nama>` dan `__EXIT__<kode>`; web memolling `GET /api/jobs/{job}/log`.
-- **Rute Laravel**: `POST /api/jobs/{job}?ds=`, `GET /api/jobs/{job}/log`, `GET /api/kode`. Job di luar whitelist dijawab 404, `ds` selain `crime|crashes|311|all` dijawab 422.
+- **Pengawasan job**: log tiap job memuat penanda `__STEP__<nama>` dan `__EXIT__<kode>`; aplikasi membaca log job secara berkala.
 - **Kebersihan data (MapReduce prep)**: mapper membersihkan kolom dan membuat fitur waktu; reducer membuang duplikat per kunci dan mengambil versi terbaru; counter `dup_identical` dan `dup_key` terlihat di UI YARN.
 - **Penyimpanan ganda**: setiap berkas unduhan disimpan di `data/landing/<dataset>` (PutFile) sebelum masuk HDFS (PutHDFS), ukuran keduanya sama. Hapus `data/landing` bila disk sempit.
 - Peta kode lengkap: [`docs/peta-kode-spark.md`](docs/peta-kode-spark.md).
@@ -158,18 +147,12 @@ PYTHONPATH=. .venv/bin/python -m tests.test_m1 --parquet   # bersih data dan kun
 PYTHONPATH=. .venv/bin/python -m tests.test_bi
 PYTHONPATH=. .venv/bin/python -m tests.test_mr             # total MapReduce = Spark
 ```
-Rute Laravel dapat dicoba dengan curl:
-```bash
-curl -X POST "localhost:8010/api/jobs/hdfs"
-curl "localhost:8010/api/jobs/hdfs/log"        # selesai bila ada __EXIT__0
-curl -X POST "localhost:8010/api/jobs/xyz"     # 404
-```
 
 ## Pemecahan masalah
 | Gejala | Penyebab | Tindakan |
 |---|---|---|
 | `Connection refused localhost:9000` | HDFS mati (sesi WSL berakhir) | `start-dfs.sh; start-yarn.sh` di terminal WSL yang tetap terbuka |
-| Tombol job tidak bereaksi | Laravel belum jalan | `php artisan serve --port=8010` |
+| Tombol job tidak bereaksi | Streamlit belum jalan | `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` |
 | Kirim link: NiFi tidak terjangkau | NiFi mati atau ListenHTTP berhenti | `nifi.sh start`, jalankan processor |
 | NiFi mengunduh semua bulan | `GenerateFlowFile` hidup | Hentikan processor itu |
 | Halaman Modul 2 kosong | MySQL belum terisi | `php web/setup.php` |
@@ -185,4 +168,4 @@ curl -X POST "localhost:8010/api/jobs/xyz"     # 404
 - Salinan lokal PutFile menggandakan kebutuhan disk data mentah.
 
 ## Aplikasi (Streamlit)
-Web kini Streamlit (folder `app/`): `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` lalu buka http://localhost:8501. Tes: `PYTHONPATH=. .venv/bin/python tests/test_app.py`. Versi PHP + Laravel lama tetap di `web/` sebagai cadangan.
+Web kini Streamlit (folder `app/`): `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` lalu buka http://localhost:8501. Tes: `PYTHONPATH=. .venv/bin/python tests/test_app.py`. Versi PHP lama tetap di `web/` sebagai arsip (lapisan Laravel sudah dihapus, jadi tombol job di sana tidak berfungsi).

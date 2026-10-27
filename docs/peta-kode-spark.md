@@ -3,7 +3,7 @@ updated: 2026-10-26
 ---
 # Peta kode analisis (PySpark + MapReduce)
 
-Lokasi semua kode: repo WSL `~/tugas-akhir-bigdata` = `\\wsl.localhost\Ubuntu\home\lenovo\tugas-akhir-bigdata`. Dijalankan dari root repo dengan `.venv/bin/python -m src.<nama>`. Alur: (lihat README). Web memicu lewat whitelist job (`jobs.php`, kini lewat lapisan Laravel).
+Lokasi semua kode: repo WSL `~/tugas-akhir-bigdata` = `\\wsl.localhost\Ubuntu\home\lenovo\tugas-akhir-bigdata`. Dijalankan dari root repo dengan `.venv/bin/python -m src.<nama>`. Alur: (lihat README). Web memicu lewat whitelist job (`app/inti.py`, Streamlit).
 
 ## Urutan eksekusi (`src/pipeline.sh`)
 `run_prep.sh` -> `load_parquet` -> `run_mr.sh` -> `bi` -> `analisis` -> `ml` -> `export_web`
