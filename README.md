@@ -1,6 +1,6 @@
 # Chicago Crime Safety Insight
 
-Tugas Akhir Big Data & Analitik. Aplikasi web yang menganalisis dan memprediksi kejahatan kota Chicago dari data terbuka, dibangun di atas pipeline Big Data lengkap: **NiFi, HDFS, MapReduce (YARN), Spark/MLlib, MySQL, PHP (Laragon), dan Laravel**.
+Tugas Akhir Big Data & Analitik. Aplikasi web yang menganalisis dan memprediksi kejahatan kota Chicago dari data terbuka, dibangun di atas pipeline Big Data lengkap: **NiFi, HDFS, MapReduce (YARN), Spark/MLlib, Streamlit, dan MySQL**.
 
 Repositori: https://github.com/hasanhuzaifi/Tugas-Akhir-Big-data-analitik
 
@@ -105,10 +105,11 @@ Langkah:
 1. **Klon repo ke WSL**: `git clone https://github.com/hasanhuzaifi/Tugas-Akhir-Big-data-analitik.git ~/tugas-akhir-bigdata`
 2. **Lingkungan Python**: `cd ~/tugas-akhir-bigdata && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`
 3. **Hadoop**: `start-dfs.sh; start-yarn.sh; jps` (harus ada NameNode, DataNode, ResourceManager, NodeManager). Jangan jalankan `namenode -format` pada HDFS yang sudah berisi data. Buat direktori: `hdfs dfs -mkdir -p /data/raw/{crime,crashes,311}`.
-4. **NiFi (di Windows, disarankan)**: unduh `nifi-2.12.0-bin.zip`, ekstrak ke folder `NiFi\` di samping proyek (junction `C:
+4. **NiFi (di WSL, utama)**: pasang `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 (Maven Central) ke `$NIFI_HOME/lib` agar `PutHDFS` tersedia, lalu `nifi.sh start` (atau `bash siapkan_layanan.sh`). Buka `https://localhost:8443/nifi`. **Cadangan bila WSL sering mati**: NiFi di Windows. Ekstrak `nifi-2.12.0-bin.zip` ke folder `NiFi\` di samping proyek (junction `C:
+ifi` agar path tanpa spasi dan `&`), salin dua NAR Hadoop ke `lib\`, atur login dengan `java -cp "libootstrap\*;conf" org.apache.nifi.authentication.single.user.command.SetSingleUserCredentials <user> <sandi>` (sandi minimal 12 karakter), lalu `hidupkan_nifi.ps1` (`-Stop` untuk berhenti; di mesin ini `nifi.cmd start` berhasil, `nifi.cmd run` keluar diam; start pertama ±5 menit). PutHDFS dari Windows tetap menulis ke HDFS di WSL (`localhost:9000`). Jangan jalankan dua NiFi bersamaan (port 8443/8081 bentrok).
 ifi` agar path tanpa spasi dan `&`), salin `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 ke `lib\`, atur login `java -cp "libootstrap\*;conf" org.apache.nifi.authentication.single.user.command.SetSingleUserCredentials <user> <sandi>` (sandi minimal 12 karakter), lalu `hidupkan_nifi.ps1`. NiFi di Windows tetap menulis ke HDFS di WSL (`localhost:9000`, mirrored networking). Alternatif NiFi di WSL: pasang `nifi-hadoop-nar` dan `nifi-hadoop-libraries-nar` 2.12.0 (Maven Central) ke `$NIFI_HOME/lib` agar `PutHDFS` tersedia, lalu `nifi.sh start`. Buka `https://localhost:8443/nifi`.
 5. **Bangun flow**: `NIFI_USER=<user> NIFI_PASS=<sandi> python3 nifi/build_flow.py` (NiFi Windows: tambah `NIFI_HOST=windows`), lalu jalankan semua processor di UI **kecuali** `GenerateFlowFile` (biarkan STOPPED; kalau hidup, ia mengunduh semua bulan sekaligus). `nifi/flow.json` adalah hasil ekspor flow.
-6. **Daemon harus hidup**: HDFS dan YARN (dan NiFi bila di WSL) mati bila sesi WSL berakhir; NiFi di Windows tidak ikut mati. Jalankan di terminal WSL yang tetap terbuka, atau pakai `exec sleep infinity` di akhir perintah.
+6. **Daemon harus hidup**: HDFS, YARN, dan NiFi (bila di WSL) mati bila sesi WSL berakhir. Bila disk C hampir penuh (<1 GB) `wslservice.exe` crash dan WSL keluar sendiri: kosongkan `C:\Windows\SoftwareDistribution\Download` (admin) lalu `wsl --update`. Jalankan di terminal WSL yang tetap terbuka, atau pakai `exec sleep infinity` di akhir perintah.
 7. **Web**: salin `web/` ke Laragon (seperti Jalur A), jalankan `setup.php` bila MySQL masih kosong.
 8. **Jalankan**: buka web, Modul 1, pilih dataset (atau Semua dataset) dan bulan (rentang kustom ada di Lanjutan), klik **Ambil data pilihan** (akuisisi: NiFi ke HDFS; perkiraan ukuran tampil), lalu **Jalankan preprocessing** (MapReduce prep di YARN, lalu Parquet). Tombol **Unduh paket lebih dari 1 GB** menarik tiga dataset seluruh periode (±1,7 GB, syarat dosen). Analisis dan ML dijalankan tombol terpisah di bagian 3. Atau jalankan tahap manual di WSL:
    ```bash
@@ -154,7 +155,7 @@ PYTHONPATH=. .venv/bin/python -m tests.test_mr             # total MapReduce = S
 |---|---|---|
 | `Connection refused localhost:9000` | HDFS mati (sesi WSL berakhir) | `start-dfs.sh; start-yarn.sh` di terminal WSL yang tetap terbuka |
 | Tombol job tidak bereaksi | Streamlit belum jalan | `.venv/bin/streamlit run app/streamlit_app.py --server.port 8501` |
-| Kirim link: NiFi tidak terjangkau | NiFi mati atau ListenHTTP berhenti | Windows: `hidupkan_nifi.ps1`; WSL: `nifi.sh start`; lalu jalankan processor |
+| Kirim link: NiFi tidak terjangkau | NiFi mati atau ListenHTTP berhenti | WSL: `bash siapkan_layanan.sh`; cadangan Windows: `hidupkan_nifi.ps1`; lalu jalankan processor |
 | NiFi mengunduh semua bulan | `GenerateFlowFile` hidup | Hentikan processor itu |
 | Halaman Modul 2 kosong | MySQL belum terisi | `php web/setup.php` |
 | Job gagal dengan jalur aneh | Spasi atau `&` di `run_dir` | Pakai jalur tanpa spasi, mis. `C:/Temp/bigdata-web` |
